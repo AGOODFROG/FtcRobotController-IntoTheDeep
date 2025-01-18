@@ -33,12 +33,16 @@ import org.firstinspires.ftc.teamcode.modular.BaseLinearOpMode
 @TeleOp(name = "HuskyLens Tester")
 class HuskyLensTester : BaseLinearOpMode() {
     // Define all hardware (gamepad and HuskyLens)
+    init {
+        this.initHardware(false)
+    }
+
     private lateinit var gp1: GamepadState
-    private lateinit var huskyLens: HuskyLens
+    //private lateinit var huskyLens: HuskyLens
 
     // So having a ratelimit is apparently important, "to make it easier to read"
-    private var huckReadPeriod: Long = 1
-    private var huskyRateLimit: Deadline = Deadline(huckReadPeriod, TimeUnit.SECONDS)
+    //private var huckReadPeriod: Long = 1
+    //private var huskyRateLimit: Deadline = Deadline(huckReadPeriod, TimeUnit.SECONDS)
 
     // Updates active camera algorithm when called
     class LensMode(private val huskyLens: HuskyLens, private val telemetry: Telemetry) {
@@ -68,14 +72,14 @@ class HuskyLensTester : BaseLinearOpMode() {
     }
 
     override fun runOpMode() {
-        huskyLens = hardwareMap.get(HuskyLens::class.java, "huskylens")
+        //huskyLens = hardwareMap.get(HuskyLens::class.java, "huskylens")
 
         huskyRateLimit.expire()
 
         gp1 = GamepadState(gamepad1)
 
         LensMode(
-            huskyLens,
+            this.huskyLens,
             telemetry
         ).colorRecognition() // Sets the default mode. Most likely we'll use color recognition to detect game objects.
 

@@ -31,16 +31,26 @@ abstract class BaseLinearOpMode : LinearOpMode() {
     protected lateinit var ratchet: ServoWrapper
     protected lateinit var hooks: ServoWrapper
 
-    private lateinit var huskyLens: HuskyLens
+    protected lateinit var huskyLens: HuskyLens
+
 
     // So having a ratelimit is apparently important, "to make it easier to read"
-    private var huckReadPeriod: Long = 1
-    private var huskyRateLimit: Deadline = Deadline(huckReadPeriod, TimeUnit.SECONDS)
+
+    //TODO move to initHarware
+    protected var huckReadPeriod: Long = 1
+    protected var huskyRateLimit: Deadline = Deadline(huckReadPeriod, TimeUnit.SECONDS)
 
 
 
-    protected fun initHardware(unlatchRatchet: Boolean, mode: LensMode) {
+    protected fun initHardware(unlatchRatchet: Boolean, /*mode: LensMode = LensMode.COLOR_RECOGNITION*/) {
+
+
         this.telemetry.msTransmissionInterval = 10
+
+        this.hardwareMap
+
+        //this.huskyLens = hardwareMap.get(HuskyLens::class.java, "husky_lens")
+        this.huskyLens = this.hardwareMap["husky_lens"]  as HuskyLens
 
         this.leftBack = this.hardwareMap["left_back"] as DcMotorEx
         this.rightBack = this.hardwareMap["right_back"] as DcMotorEx
@@ -88,10 +98,11 @@ abstract class BaseLinearOpMode : LinearOpMode() {
         this.switch = this.hardwareMap["touch_sensor"] as TouchSensor
 
 
-
-        huskyLens = hardwareMap.get(HuskyLens::class.java, "huskylens")
+        // todo uses hardware map
+        //huskyLens = hardwareMap.get(HuskyLens::class.java, "huskylens")
         require(huskyLens.knock()) { "Failed to communicate with HuskyLens" }
         huskyLens.initialize()
+        /*
         when (mode) {
             LensMode.TAG_RECOGNITION -> huskyLens.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION)
             LensMode.COLOR_RECOGNITION -> huskyLens.selectAlgorithm(HuskyLens.Algorithm.COLOR_RECOGNITION)
@@ -99,40 +110,12 @@ abstract class BaseLinearOpMode : LinearOpMode() {
             LensMode.OBJECT_CLASSIFICATION -> huskyLens.selectAlgorithm(HuskyLens.Algorithm.OBJECT_CLASSIFICATION)
         }
 
+         */
 
-    fun readLens(mode: LensMode): Array<com.qualcomm.hardware.dfrobot.HuskyLens.Block> {
-        val huskyLens = hardwareMap.get(com.qualcomm.hardware.dfrobot.HuskyLens::class.java, "huskylens")
-        val blocks: Array<com.qualcomm.hardware.dfrobot.HuskyLens.Block> = huskyLens.blocks()
-        return blocks
+
     }
+
 }
 
-    }
-
-class LensMode(private val huskyLens: HuskyLens, private val telemetry: Telemetry) {
-    fun tagRecognition() {
-        huskyLens.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION)
-        telemetry.addData(">>", "Set HuskyLens algorithm to tag recognition.")
-        telemetry.update()
-    }
-
-    fun colorRecognition() {
-        huskyLens.selectAlgorithm(HuskyLens.Algorithm.COLOR_RECOGNITION)
-        telemetry.addData(">>", "Set HuskyLens algorithm to color recognition.")
-        telemetry.update()
-    }
-
-    fun objectRecognition() {
-        huskyLens.selectAlgorithm(HuskyLens.Algorithm.OBJECT_RECOGNITION)
-        telemetry.addData(">>", "Set HuskyLens algorithm to object recognition.")
-        telemetry.update()
-    }
-
-    fun objectClassification() {
-        huskyLens.selectAlgorithm(HuskyLens.Algorithm.OBJECT_CLASSIFICATION)
-        telemetry.addData(">>", "Set HuskyLens algorithm to object classification.")
-        telemetry.update()
-    }
-}
 
 

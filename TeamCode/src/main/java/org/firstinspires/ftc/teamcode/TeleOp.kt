@@ -57,7 +57,7 @@ class TeleOp : BaseLinearOpMode() {
 
         // TODO: try-catch this to print any errors / force stop the program?
         try {
-            this.initHardware(true)
+            this.initHardware(true, )
             this.telemetry.addLine("initialization successful")
         } catch (e: Exception) {
             this.telemetry.addLine("initialization failed")
