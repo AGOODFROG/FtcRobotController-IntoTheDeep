@@ -37,8 +37,8 @@ class HuskyLensTester : BaseLinearOpMode() {
     private lateinit var huskyLens: HuskyLens
 
     // So having a ratelimit is apparently important, "to make it easier to read"
-    private var readPeriod: Long = 1
-    private var rateLimit: Deadline = Deadline(readPeriod, TimeUnit.SECONDS)
+    private var huckReadPeriod: Long = 1
+    private var huskyRateLimit: Deadline = Deadline(huckReadPeriod, TimeUnit.SECONDS)
 
     // Updates active camera algorithm when called
     class LensMode(private val huskyLens: HuskyLens, private val telemetry: Telemetry) {
@@ -70,7 +70,7 @@ class HuskyLensTester : BaseLinearOpMode() {
     override fun runOpMode() {
         huskyLens = hardwareMap.get(HuskyLens::class.java, "huskylens")
 
-        rateLimit.expire()
+        huskyRateLimit.expire()
 
         gp1 = GamepadState(gamepad1)
 
@@ -94,10 +94,10 @@ class HuskyLensTester : BaseLinearOpMode() {
         this.waitForStart() // Done initialization process
 
         while (this.opModeIsActive()) {
-            if (!rateLimit.hasExpired()) {
+            if (!huskyRateLimit.hasExpired()) {
                 continue
             }
-            rateLimit.reset()
+            huskyRateLimit.reset()
             this.gp1.cycle()
 
             // ALlow selection of camera algorithm by controller buttons.
