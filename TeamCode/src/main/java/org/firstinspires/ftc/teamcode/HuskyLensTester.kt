@@ -68,7 +68,7 @@ class HuskyLensTester : BaseLinearOpMode() {
     }
 
     override fun runOpMode() {
-        huskyLens = hardwareMap.get(HuskyLens::class.java, "husky_lens")
+        huskyLens = hardwareMap.get(HuskyLens::class.java, "huskylens")
 
         rateLimit.expire()
 
@@ -105,17 +105,12 @@ class HuskyLensTester : BaseLinearOpMode() {
             // See table in docstring for controls.
             if (GamepadButton(gp1, Gamepad::circle).isPressed) {
                 LensMode(huskyLens, telemetry).tagRecognition()
-                telemetry.addLine("tagRecognition")
             } else if (GamepadButton(gp1, Gamepad::square).isPressed) {
                 LensMode(huskyLens, telemetry).colorRecognition()
-                telemetry.addLine("colorgRecognition()")
             } else if (GamepadButton(gp1, Gamepad::cross).isPressed) {
                 LensMode(huskyLens, telemetry).objectRecognition()
-                telemetry.addLine("objectRecognition()")
-
             } else if (GamepadButton(gp1, Gamepad::triangle).isPressed) {
                 LensMode(huskyLens, telemetry).objectClassification()
-                telemetry.addLine("objectClassification")
             }
 
             val blocks: Array<HuskyLens.Block> = huskyLens.blocks()
