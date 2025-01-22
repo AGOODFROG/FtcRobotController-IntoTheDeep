@@ -72,7 +72,7 @@ class HuskyLensTester : BaseLinearOpMode() {
     }
 
     override fun runOpMode() {
-        //huskyLens = hardwareMap.get(HuskyLens::class.java, "huskylens")
+        huskyLens = hardwareMap.get(HuskyLens::class.java, "huskylens")
 
         huskyRateLimit.expire()
 

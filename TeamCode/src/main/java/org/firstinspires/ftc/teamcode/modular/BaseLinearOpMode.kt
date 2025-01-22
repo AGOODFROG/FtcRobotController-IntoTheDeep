@@ -32,13 +32,15 @@ abstract class BaseLinearOpMode : LinearOpMode() {
     protected lateinit var hooks: ServoWrapper
 
     protected lateinit var huskyLens: HuskyLens
+    protected var huckReadPeriod: Long = 0
+
+
 
 
     // So having a ratelimit is apparently important, "to make it easier to read"
 
     //TODO move to initHarware
-    protected var huckReadPeriod: Long = 1
-    protected var huskyRateLimit: Deadline = Deadline(huckReadPeriod, TimeUnit.SECONDS)
+
 
 
 
@@ -50,7 +52,8 @@ abstract class BaseLinearOpMode : LinearOpMode() {
         this.hardwareMap
 
         //this.huskyLens = hardwareMap.get(HuskyLens::class.java, "husky_lens")
-        this.huskyLens = this.hardwareMap["husky_lens"]  as HuskyLens
+        this.huskyLens = this.hardwareMap["husky_lens"] as HuskyLens
+
 
         this.leftBack = this.hardwareMap["left_back"] as DcMotorEx
         this.rightBack = this.hardwareMap["right_back"] as DcMotorEx
@@ -98,10 +101,11 @@ abstract class BaseLinearOpMode : LinearOpMode() {
         this.switch = this.hardwareMap["touch_sensor"] as TouchSensor
 
 
+
+
         // todo uses hardware map
         //huskyLens = hardwareMap.get(HuskyLens::class.java, "huskylens")
-        require(huskyLens.knock()) { "Failed to communicate with HuskyLens" }
-        huskyLens.initialize()
+
         /*
         when (mode) {
             LensMode.TAG_RECOGNITION -> huskyLens.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION)
@@ -114,6 +118,7 @@ abstract class BaseLinearOpMode : LinearOpMode() {
 
 
     }
+
 
 }
 
