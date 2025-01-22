@@ -7,7 +7,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.internal.system.Deadline
 import org.firstinspires.ftc.teamcode.modular.GamepadButton
 import org.firstinspires.ftc.teamcode.modular.GamepadState
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnitq
 import org.firstinspires.ftc.teamcode.modular.BaseLinearOpMode
 
 /**
@@ -38,11 +38,11 @@ class HuskyLensTester : BaseLinearOpMode() {
     }
 
     private lateinit var gp1: GamepadState
-    //private lateinit var huskyLens: HuskyLens
+    //`private lateinit var huskyLens: HuskyLens
 
     // So having a ratelimit is apparently important, "to make it easier to read"
     //private var huckReadPeriod: Long = 1
-    //private var huskyRateLimit: Deadline = Deadline(huckReadPeriod, TimeUnit.SECONDS)
+    private var huskyRateLimit: Deadline = Deadline(huckReadPeriod, TimeUnit.SECONDS)
 
     // Updates active camera algorithm when called
     class LensMode(private val huskyLens: HuskyLens, private val telemetry: Telemetry) {
