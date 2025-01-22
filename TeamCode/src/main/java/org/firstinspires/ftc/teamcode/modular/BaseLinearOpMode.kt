@@ -25,9 +25,7 @@ abstract class BaseLinearOpMode : LinearOpMode() {
     protected lateinit var ratchet: ServoWrapper
     protected lateinit var hooks: ServoWrapper
 
-    protected fun initHardware(unlatchRatchet: Boolean) {
-        this.telemetry.msTransmissionInterval = 10
-
+    protected fun initHardware() {
         this.leftBack = this.hardwareMap["left_back"] as DcMotorEx
         this.rightBack = this.hardwareMap["right_back"] as DcMotorEx
         this.rightFront = this.hardwareMap["right_front"] as DcMotorEx
@@ -38,7 +36,7 @@ abstract class BaseLinearOpMode : LinearOpMode() {
         this.leftBack.direction = DcMotorSimple.Direction.REVERSE
         this.rightBack.direction = DcMotorSimple.Direction.FORWARD
 
-        this.allMotors = arrayOf(this.leftFront, this.rightFront, this.leftBack, this.rightBack)
+        this.allMotors = arrayOf(leftFront, rightFront, leftBack, rightBack)
 
         this.odometry = this.hardwareMap["odometry"] as GoBildaPinpointDriver
         this.odometry.setOffsets(95.0, 0.0)
@@ -47,30 +45,31 @@ abstract class BaseLinearOpMode : LinearOpMode() {
             GoBildaPinpointDriver.EncoderDirection.FORWARD,
             GoBildaPinpointDriver.EncoderDirection.REVERSED
         )
-        this.odometry.resetPosAndIMU()
+        odometry.resetPosAndIMU()
 
-        this.arm = this.hardwareMap["arm"] as DcMotorEx
-        this.arm.direction = DcMotorSimple.Direction.REVERSE
-        this.arm.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-        this.arm.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        arm = this.hardwareMap["arm"] as DcMotorEx
+        arm.direction = DcMotorSimple.Direction.REVERSE
+        arm.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+        arm.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
 
-        this.elevator = this.hardwareMap["elevator"] as DcMotorEx
-        this.elevator.direction = DcMotorSimple.Direction.REVERSE
-        this.elevator.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+        elevator = this.hardwareMap["elevator"] as DcMotorEx
+        elevator.direction = DcMotorSimple.Direction.REVERSE
+        elevator.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
 
-        this.ratchet = ServoWrapper(this.hardwareMap.servo["ratchet"], 0.12, 0.0, this)
-        if (unlatchRatchet) this.ratchet.disengage() else this.ratchet.engage()
+        ratchet = ServoWrapper(this.hardwareMap.servo["ratchet"], 0.1, 0.0)
+        ratchet.disengage()
 
-        this.hooks = ServoWrapper(this.hardwareMap.servo["hooks"], 0.6, 0.08, this)
-        this.hooks.disengage()
+        hooks = ServoWrapper(this.hardwareMap.servo["hooks"], 0.6, 0.2)
+        hooks.disengage()
+        hooks.disablePwm()
 
         val leftSpinner = this.hardwareMap["left_spinner"] as CRServo
         leftSpinner.direction = DcMotorSimple.Direction.REVERSE
         val rightSpinner = this.hardwareMap["right_spinner"] as CRServo
-        this.spinner = Spinner(leftSpinner, rightSpinner)
+        spinner = Spinner(leftSpinner, rightSpinner)
 
-        this.bucket = this.hardwareMap["bucket"] as Servo
+        bucket = this.hardwareMap["bucket"] as Servo
 
-        this.switch = this.hardwareMap["touch_sensor"] as TouchSensor
+        switch = this.hardwareMap["touch_sensor"] as TouchSensor
     }
 }
