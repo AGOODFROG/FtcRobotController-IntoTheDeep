@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
+import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
@@ -19,20 +20,18 @@ import kotlin.math.sign
 // @Disabled
 class TeleOp : BaseLinearOpMode() {
     // kotlin does not do numeric type promotion, if the 3rd arg is just "1" than T cannot be inferred
-    private var power = ToggleableState(2, false, 0.33, 0.67, 1.0)
+    private val power = ToggleableState(2, false, 0.33, 0.67, 1.0)
     private lateinit var gp1: GamepadState
     private lateinit var gp2: GamepadState
 
     override fun runOpMode() {
-        telemetry.msTransmissionInterval = 100
-
         gp1 = GamepadState(gamepad1)
         gp2 = GamepadState(this.gamepad2)
 
         val toggleButtonMap = mapOf(
             GamepadButton(gp1, Gamepad::left_bumper) to power::left,
             GamepadButton(gp1, Gamepad::right_bumper) to power::right,
-            GamepadButton(gp2, Gamepad::dpad_right) to { bucket.position = 0.0 },
+            GamepadButton(gp2, Gamepad::dpad_right) to { bucket.position = bucketDumping },
 
             GamepadButton(gp2, Gamepad::dpad_down) to {
                 arm.power = 0.0
@@ -45,7 +44,7 @@ class TeleOp : BaseLinearOpMode() {
                 ratchet.disableManual()
             },
 
-            GamepadButton(gp1, Gamepad::x) to {allMotors.forEach {it.toggleDirection()}},
+            GamepadButton(gp1, Gamepad::x) to { allMotors.forEach(DcMotorEx::toggleDirection) },
 
             GamepadButton(gp2, Gamepad::dpad_left) to {
                 hooks.toggle()
@@ -58,7 +57,7 @@ class TeleOp : BaseLinearOpMode() {
 
         // TODO: try-catch this to print any errors / force stop the program?
         try {
-            this.initHardware()
+            this.initHardware(true)
             this.telemetry.addLine("initialization successful")
         } catch (e: Exception) {
             this.telemetry.addLine("initialization failed")
@@ -115,16 +114,14 @@ class TeleOp : BaseLinearOpMode() {
             // arm reaches bottom
             if (currSwitch && !lastSwitch) {
                 arm.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-                arm.mode = DcMotor.RunMode.RUN_USING_ENCODER
+                arm.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
                 if (!ratchet.manual()) ratchet.engage()
-                Thread.sleep(500)
-                bucket.position = 0.225
+                bucket.position = bucketWaiting
             }
 
             // going up while arm is at bottom
             if (ratchet.engaged() && (-gp2.current.right_stick_y > 0 && currSwitch || -gp2.current.right_stick_y < 0 && !currSwitch /* should never happen */)) {
                 if (!ratchet.manual()) ratchet.disengage()
-                Thread.sleep(500)
             }
 
             if (!ratchet.manual() && ratchet.engaged() && (-gp2.current.right_stick_y > 0 && currSwitch || -gp2.current.right_stick_y < 0 && !currSwitch /* should never happen */)) {
@@ -133,7 +130,9 @@ class TeleOp : BaseLinearOpMode() {
 
             when {
                 // block if ratchet is engaged
-                ratchet.engaged() -> { arm.power = 0.0 }
+                ratchet.engaged() -> {
+                    arm.power = 0.0
+                }
 
                 // arm going up
                 -gp2.current.right_stick_y > 0 && arm.currentPosition < 7000 -> {
@@ -142,11 +141,13 @@ class TeleOp : BaseLinearOpMode() {
 
                 // arm going down
                 -gp2.current.right_stick_y < 0 && !currSwitch -> {
-                    bucket.position = 0.4
+                    bucket.position = bucketWaiting
                     arm.power = -gp2.current.right_stick_y * 1.0
                 }
 
-                else -> { arm.power = 0.0 }
+                else -> {
+                    arm.power = 0.0
+                }
             }
 
             // elevator and spinner
