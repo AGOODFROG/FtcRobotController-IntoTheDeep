@@ -14,6 +14,35 @@ import kotlin.math.sign
 import org.firstinspires.ftc.robotcore.internal.system.Deadline
 import java.util.concurrent.TimeUnit
 import com.qualcomm.hardware.dfrobot.HuskyLens
+import org.firstinspires.ftc.robotcore.external.Telemetry
+import org.firstinspires.ftc.teamcode.HuskyLensTester.LensMode
+
+
+class LensMode(private val huskyLens: HuskyLens, private val telemetry: Telemetry) {
+    fun tagRecognition() {
+        huskyLens.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION)
+        telemetry.addData(">>", "Set HuskyLens algorithm to tag recognition.")
+        telemetry.update()
+    }
+
+    fun colorRecognition() {
+        huskyLens.selectAlgorithm(HuskyLens.Algorithm.COLOR_RECOGNITION)
+        telemetry.addData(">>", "Set HuskyLens algorithm to color recognition.")
+        telemetry.update()
+    }
+
+    fun objectRecognition() {
+        huskyLens.selectAlgorithm(HuskyLens.Algorithm.OBJECT_RECOGNITION)
+        telemetry.addData(">>", "Set HuskyLens algorithm to object recognition.")
+        telemetry.update()
+    }
+
+    fun objectClassification() {
+        huskyLens.selectAlgorithm(HuskyLens.Algorithm.OBJECT_CLASSIFICATION)
+        telemetry.addData(">>", "Set HuskyLens algorithm to object classification.")
+        telemetry.update()
+    }
+}
 
 
 @Suppress("unused")
@@ -94,6 +123,8 @@ class AutonomousTest : BaseLinearOpMode() {
     private var stageIdx = 0
     private var stopped = false
 
+
+
     private fun reset() {
         this.allMotors.forEach { it.power = 0.0 }
         this.stage.reset()
@@ -109,10 +140,58 @@ class AutonomousTest : BaseLinearOpMode() {
             telemetry.addLine("arm not in correct state, do not start!")
             telemetry.update()
         }
+
+        huskyLens = hardwareMap.get(HuskyLens::class.java, "huskylens")
+
+        val huskyRateLimit: Deadline = Deadline(huckReadPeriod, TimeUnit.SECONDS)
+
+        huskyRateLimit.expire()
+
+        LensMode(
+            this.huskyLens,
+            telemetry
+        ).colorRecognition() // Sets the default mode. Most likely we'll use color recognition to detect game objects.
+
+        // Proof of life check
+        if (huskyLens.knock()) {
+            telemetry.addData(
+                ">>",
+                "Connected to ${huskyLens.deviceName}, press start to continue."
+            )
+            telemetry.update()
+        } else {
+            telemetry.addData(">>", "Could not communicate with ${huskyLens.deviceName}")
+            telemetry.update()
+        }
+
+
         this.waitForStart()
         while (this.opModeIsActive() && !stopped) {
+
+            if (!huskyRateLimit.hasExpired()) {
+                telemetry.addLine("Husky rate limit Expired")
+                //continue
+            }
             this.odometry.update()
             this.telemetry.addData("stage", this.stage)
+
+            val blocks: Array<HuskyLens.Block> = huskyLens.blocks()
+            val arrows: Array<HuskyLens.Arrow> = huskyLens.arrows()
+
+
+            for (block in blocks) {
+                telemetry.addData("Detected block: ", block.id.toString())
+                telemetry.addData("Block size: ", (block.width * block.height).toString())
+                telemetry.addData("Block edges: ", (block.left and block.top).toString())
+                telemetry.addData("Box center: ", "(${block.x}, ${block.y})")
+                telemetry.addData("Raw block array: ", block.toString())
+            }
+
+            for (arrow in arrows) {
+                telemetry.addData("Detected arrow: ", arrow.id.toString())
+                telemetry.addData("Arrow origin: ", "(${arrow.x_origin}, ${arrow.y_origin})")
+                telemetry.addData("Arrow target: ", "(${arrow.x_target}, ${arrow.x_target})")
+            }
 
             if (!this.stage.started()) {
                 this.stage.start(this)
@@ -128,7 +207,7 @@ class AutonomousTest : BaseLinearOpMode() {
                 }
             }
 
-//            sleep(100)
+//            sleep(100) //??? this is unreachable
 
             val finished = this.stage.check(this.odometry.position)
             this.telemetry.addData("finished", finished)
@@ -198,6 +277,7 @@ class AutonomousTest : BaseLinearOpMode() {
 //            if (mode == Mode.PIVOT_RB) {
 //                target = -target
 //            }
+//            this.initHardware(true) // may be need use if intazation issues are present
             if (mode == Mode.TURN || mode == Mode.PIVOT_RB) {
                 assert(abs(target) < 360)
                 absoluteTarget = (startHeading + target + 360).toInt() % 360
