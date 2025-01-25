@@ -39,6 +39,7 @@ abstract class BaseLinearOpMode : LinearOpMode() {
         this.rightBack.direction = DcMotorSimple.Direction.FORWARD
 
         this.allMotors = arrayOf(this.leftFront, this.rightFront, this.leftBack, this.rightBack)
+        this.allMotors.forEach { it.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE }
 
         this.odometry = this.hardwareMap["odometry"] as GoBildaPinpointDriver
         this.odometry.setOffsets(95.0, 0.0)
@@ -53,15 +54,16 @@ abstract class BaseLinearOpMode : LinearOpMode() {
         this.arm.direction = DcMotorSimple.Direction.REVERSE
         this.arm.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
         this.arm.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        this.arm.power = 0.0
 
         this.elevator = this.hardwareMap["elevator"] as DcMotorEx
         this.elevator.direction = DcMotorSimple.Direction.REVERSE
         this.elevator.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
 
-        this.ratchet = ServoWrapper(this.hardwareMap.servo["ratchet"], 0.12, 0.0, this)
+        this.ratchet = ServoWrapper(this.hardwareMap.servo["ratchet"], 0.085, 0.0)
         if (unlatchRatchet) this.ratchet.disengage() else this.ratchet.engage()
 
-        this.hooks = ServoWrapper(this.hardwareMap.servo["hooks"], 0.6, 0.08, this)
+        this.hooks = ServoWrapper(this.hardwareMap.servo["hooks"], 0.6, 0.08)
         this.hooks.disengage()
 
         val leftSpinner = this.hardwareMap["left_spinner"] as CRServo
@@ -72,5 +74,6 @@ abstract class BaseLinearOpMode : LinearOpMode() {
         this.bucket = this.hardwareMap["bucket"] as Servo
 
         this.switch = this.hardwareMap["touch_sensor"] as TouchSensor
+        println(this.switch)
     }
 }
